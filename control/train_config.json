@@ -1,5 +1,5 @@
 {
-	"train_data": "../data/sample.txt",
+	"train_data": "/data/sample.txt",
 	"vocab": "bert-base-cased",
 	"base_model": "bert-base-cased",
 	"relations": 743,
