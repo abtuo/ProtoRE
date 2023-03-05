@@ -223,10 +223,10 @@ if __name__ == "__main__":
     train_config = json.load(open(sys.argv[1]))
     train_data = Data(train_config["train_data"])
 
-    tokenizer = BertTokenizer.from_pretrained(
-        train_config["vocab"], do_lower_case=False
-    )
-    bert_encoder = BERT_EM.from_pretrained(train_config["base_model"])
+    bert_path = "bert-base-cased"
+    tokenizer = BertTokenizer.from_pretrained(bert_path, do_lower_case=False)
+
+    bert_encoder = BERT_EM.from_pretrained("bert-base-cased")
 
     print("Finished loading pre-trained model...")
     train(train_data, tokenizer, bert_encoder, train_config)
