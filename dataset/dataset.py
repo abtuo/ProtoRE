@@ -76,9 +76,12 @@ class Data(Dataset):
         return len(self.relation_inst_ids.keys())
 
     def __getitem__(self, idx):
-        relations = random.sample(self.relation_inst_ids.keys(), 5)
+        N = 5
+        relations = random.sample(list(self.relation_inst_ids.keys()), N)
+
         positive_relation = relations[0]
-        idxs = self.sample(self.relation_inst_ids[positive_relation], 8)
+        K = 1
+        idxs = self.sample(self.relation_inst_ids[positive_relation], K)
         p_input_ids, p_e_pos1, p_e_pos2, p_label = self.collect(
             self.inst_id_detail, idxs
         )
@@ -140,11 +143,11 @@ class Data(Dataset):
 
 
 if __name__ == "__main__":
-    path = "data/sample.txt"
+    path = "data/meta_dev_args.txt"
     data = Data(path)
     data_loader = DataLoader(data, batch_size=1, shuffle=True)
     for i_batch, batch_data in enumerate(data_loader):
-        print(batch_data["p_input_id"].dtype)
+        print(batch_data["p_input_id"].shape)
         print("\002")
         print("\001")
         print("-" * 20)
