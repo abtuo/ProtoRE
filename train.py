@@ -124,7 +124,7 @@ def train(train_data, tokenizer, bert_encoder, config):
             p_e_pos1 = flat(batch_data["p_e_pos1"])
             p_e_pos2 = flat(batch_data["p_e_pos2"])
             p_labels = flat(batch_data["p_label"])
-            p_mlm_loss, p_relation_embedding = bert_encoder(
+            p_mlm_loss, p_relation_embedding, p_trigger_loss = bert_encoder(
                 p_input_ids.cuda(),
                 p_e_pos1.cuda(),
                 p_e_pos2.cuda(),
@@ -143,7 +143,7 @@ def train(train_data, tokenizer, bert_encoder, config):
             n_mask = flat(batch_data["n_mask"])
             n_e_pos1 = flat(batch_data["n_e_pos1"])
             n_e_pos2 = flat(batch_data["n_e_pos2"])
-            n_mlm_loss, n_relation_embedding = bert_encoder(
+            n_mlm_loss, n_relation_embedding, n_trigger_loss = bert_encoder(
                 n_input_ids.cuda(),
                 n_e_pos1.cuda(),
                 n_e_pos2.cuda(),
@@ -166,6 +166,7 @@ def train(train_data, tokenizer, bert_encoder, config):
                 * 0.5
             )
             mlm_loss = p_mlm_loss.mean() + n_mlm_loss.mean()
+            trigger_loss = p_trigger_loss.mean() + n_trigger_loss.mean()
 
             # Contrastive loss
             # (batch_size, sample_size, embedding_size)
@@ -199,9 +200,10 @@ def train(train_data, tokenizer, bert_encoder, config):
             )
             cp_loss = torch.mean(cp_loss)
 
-            loss = 0.5 * cluster_loss + 0.5 * cls_loss + cp_loss + mlm_loss * 0.5
+            loss = 0.5 * cluster_loss + 0.5 * cls_loss + cp_loss + mlm_loss * 0.5 + trigger_loss * 0.5
             loss = loss / float(grad_iter)
             if i_batch % 500 == 0:
+                print("trigger_loss: ", trigger_loss)
                 print("cluster_loss: ", cluster_loss)
                 print("cls_loss: ", cls_loss)
                 print("cp_loss: ", cp_loss)
