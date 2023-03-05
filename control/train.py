@@ -1,7 +1,7 @@
 import torch
 import sys
 
-sys.path.append("..")
+sys.path.append(".")
 import torch.optim as optim
 from models.bert_em import BERT_EM
 from models.proto_sim import ProtoSimModel
@@ -225,6 +225,6 @@ if __name__ == "__main__":
 
     tokenizer = BertTokenizer(train_config["vocab"], do_lower_case=False)
     bert_encoder = BERT_EM.from_pretrained(train_config["base_model"])
-    
+
     print("Finished loading pre-trained model...")
     train(train_data, tokenizer, bert_encoder, train_config)

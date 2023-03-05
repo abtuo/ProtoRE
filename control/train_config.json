@@ -1,3 +1,6 @@
+import sys
+
+sys.path.append('..')
 {
 	"train_data": "/data/sample.txt",
 	"vocab": "bert-base-cased",
