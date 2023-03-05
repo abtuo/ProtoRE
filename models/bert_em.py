@@ -36,17 +36,20 @@ class BERT_EM(BertPreTrainedModel):
         masked_lm_labels=None,
         dropout=torch.nn.Dropout(0),
     ):
-        print("input_ids: ", input_ids.shape)
-        print("e_pos1: ", e_pos1)
-        print("e_pos2: ", e_pos2)
-        print("attention_mask: ", attention_mask.shape)
-        bert_output = self.bert(
-            input_ids,
-            attention_mask=attention_mask,
-            token_type_ids=token_type_ids,
-            position_ids=position_ids,
-            head_mask=head_mask,
-        )
+        try:
+            bert_output = self.bert(
+                input_ids,
+                attention_mask=attention_mask,
+                token_type_ids=token_type_ids,
+                position_ids=position_ids,
+                head_mask=head_mask,
+            )
+        except:
+            print("input_ids: ", input_ids)
+            print("e_pos1: ", e_pos1)
+            print("e_pos2: ", e_pos2)
+            print("attention_mask: ", attention_mask.shape)
+            raise Exception("Error in BERT_EM forward")
 
         if masked_input_ids is not None:
             masked_bert_output = self.bert(
