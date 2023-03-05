@@ -148,6 +148,4 @@ if __name__ == "__main__":
     data_loader = DataLoader(data, batch_size=1, shuffle=True)
     for i_batch, batch_data in enumerate(data_loader):
         print(batch_data["p_input_id"])
-        print("\002")
-        print("\001")
         print("-" * 20)
