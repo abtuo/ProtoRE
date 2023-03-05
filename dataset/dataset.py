@@ -80,7 +80,7 @@ class Data(Dataset):
         relations = random.sample(list(self.relation_inst_ids.keys()), N)
 
         positive_relation = relations[0]
-        K = 1
+        K = 8
         idxs = self.sample(self.relation_inst_ids[positive_relation], K)
         p_input_ids, p_e_pos1, p_e_pos2, p_label = self.collect(
             self.inst_id_detail, idxs
