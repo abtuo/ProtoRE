@@ -217,7 +217,7 @@ def train(train_data, tokenizer, bert_encoder, config):
                 + trigger_loss * 0.5
             )
             loss = loss / float(grad_iter)
-            if i_batch % 500 == 0:
+            if i_batch % 10 == 0:
                 print("trigger_loss: ", trigger_loss)
                 print("cluster_loss: ", cluster_loss)
                 print("cls_loss: ", cls_loss)
@@ -240,7 +240,7 @@ if __name__ == "__main__":
     train_config = json.load(open(sys.argv[1]))
     train_data = Data(train_config["train_data"], train_config)
 
-    #bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
+    # bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
     bert_path = "bert-base-cased"
     tokenizer = BertTokenizer.from_pretrained(bert_path, do_lower_case=False)
 
