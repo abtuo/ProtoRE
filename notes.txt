@@ -1,0 +1,5 @@
+
+sans les triggers :
+111348
+
+avec les triggers : /ckpt_trigger_yes

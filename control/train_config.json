@@ -1,9 +1,12 @@
 {
 	"train_data": "./data/meta_train_args.txt",
+	"eval_data": "./data/meta_test_args.txt",
 	"vocab": "bert-base-cased",
 	"base_model": "bert-base-cased",
-	"relations": 26,
+	"relations": 19,
 	"embedding_size": 1536,
 	"iterations": 600,
-	"save_interval": 100
+	"save_interval": 100,
+	"K": 8,
+	"N": 5
 }

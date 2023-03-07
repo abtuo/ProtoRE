@@ -63,9 +63,12 @@ def mask_tokens(inputs, tokenizer):
 
 def train(train_data, tokenizer, bert_encoder, config):
     print("Start training...")
+    K = config["K"]  # number of samples per class
+
     data_loader = DataLoader(train_data, batch_size=1, shuffle=True)
     grad_iter = config.get("grad_iter", 16)
     proto_sim_model = ProtoSimModel(config["relations"], config["embedding_size"])
+
     if torch.cuda.is_available():
         bert_encoder = bert_encoder.cuda()
         proto_sim_model = proto_sim_model.cuda()
@@ -109,11 +112,12 @@ def train(train_data, tokenizer, bert_encoder, config):
     bert_encoder.zero_grad()
     proto_sim_model.zero_grad()
 
-    reversed_index = list(range(8))
+    reversed_index = list(range(K))
     reversed_index.reverse()
 
     for i in range(config["iterations"]):
         print("Iteration: # %d / %d" % (i, config["iterations"]))
+
         for i_batch, batch_data in enumerate(data_loader):
             # p_ = positive , n_ = negative
             p_input_ids = flat(batch_data["p_input_id"])
@@ -132,6 +136,8 @@ def train(train_data, tokenizer, bert_encoder, config):
                 masked_input_ids=p_masked_input_ids.cuda(),
                 masked_lm_labels=p_masked_mlm_labels.cuda(),
             )
+
+            # similarity positive prototype/posiitive examples
             p_similarity, p_predict_relation = proto_sim_model(
                 p_relation_embedding, p_labels.cuda()
             )
@@ -143,6 +149,7 @@ def train(train_data, tokenizer, bert_encoder, config):
             n_mask = flat(batch_data["n_mask"])
             n_e_pos1 = flat(batch_data["n_e_pos1"])
             n_e_pos2 = flat(batch_data["n_e_pos2"])
+
             n_mlm_loss, n_relation_embedding, n_trigger_loss = bert_encoder(
                 n_input_ids.cuda(),
                 n_e_pos1.cuda(),
@@ -151,6 +158,8 @@ def train(train_data, tokenizer, bert_encoder, config):
                 masked_input_ids=n_masked_input_ids.cuda(),
                 masked_lm_labels=n_masked_mlm_labels.cuda(),
             )
+
+            # similarity positive prototype/negative examples
             n_similarity, n_predict_relation = proto_sim_model(
                 n_relation_embedding, p_labels.cuda()
             )
@@ -221,7 +230,7 @@ def train(train_data, tokenizer, bert_encoder, config):
                 scheduler.step()
                 optimizer.zero_grad()
         if (i + 1) % config["save_interval"] == 0:
-            model_dir = "./ckpts/ckpt_trigger_%d" % i
+            model_dir = "./ckpts/ckpt_%d" % i
             if not os.path.exists(model_dir):
                 os.mkdir(model_dir)
             bert_encoder.save_pretrained(model_dir)
@@ -229,10 +238,10 @@ def train(train_data, tokenizer, bert_encoder, config):
 
 if __name__ == "__main__":
     train_config = json.load(open(sys.argv[1]))
-    train_data = Data(train_config["train_data"])
+    train_data = Data(train_config["train_data"], train_config)
 
-    # bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
-    bert_path = "bert-base-cased"
+    bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
+    # bert_path = "bert-base-cased"
     tokenizer = BertTokenizer.from_pretrained(bert_path, do_lower_case=False)
 
     bert_encoder = BERT_EM.from_pretrained(bert_path)

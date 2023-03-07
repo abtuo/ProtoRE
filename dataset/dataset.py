@@ -14,13 +14,17 @@ Data format:<instance id>\001<relation id>\001<start position of the first entit
 
 
 class Data(Dataset):
-    def __init__(self, data_path):
+    def __init__(self, data_path, config):
         print(f"Loading data from {data_path}...")
         (
             self.relation_name_id,
             self.relation_inst_ids,
             self.inst_id_detail,
         ) = self.load_data(data_path)
+
+        self.N = config["N"]
+        self.K = config["K"]
+
         print("Finish loading data.")
 
     def load_data(self, data_path):
@@ -33,12 +37,15 @@ class Data(Dataset):
             e_pos2 = int(e_pos2)
             if r not in relation_name_id:
                 relation_name_id[r] = len(relation_name_id.keys())
+
             word_ids = [int(x) for x in word_ids.split("\002")]
             detail = (word_ids, e_pos1, e_pos2, relation_name_id[r])
             inst_id_detail[inst_id] = detail
             inst_list = relation_inst_ids.get(relation_name_id[r], [])
             inst_list.append(inst_id)
             relation_inst_ids[relation_name_id[r]] = inst_list
+            self.labels2ids = relation_name_id
+
         return relation_name_id, relation_inst_ids, inst_id_detail
 
     def sample(self, item_list, count):
@@ -73,15 +80,16 @@ class Data(Dataset):
         return new_out
 
     def __len__(self):
-        return len(self.relation_inst_ids.keys())
+        return 1000000000
 
     def __getitem__(self, idx):
-        N = 5
-        relations = random.sample(list(self.relation_inst_ids.keys()), N)
+
+        relations = random.sample(list(self.relation_inst_ids.keys()), self.N)
 
         positive_relation = relations[0]
-        K = 8
-        idxs = self.sample(self.relation_inst_ids[positive_relation], K)
+
+        idxs = self.sample(self.relation_inst_ids[positive_relation], self.K)
+
         p_input_ids, p_e_pos1, p_e_pos2, p_label = self.collect(
             self.inst_id_detail, idxs
         )
@@ -91,7 +99,9 @@ class Data(Dataset):
 
         idxs = []
         for r in relations[1:]:
-            idxs.extend(self.sample(self.relation_inst_ids[r], 2))
+            idxs.extend(
+                self.sample(self.relation_inst_ids[r], int(self.K / (self.N - 1)))
+            )
 
         n_input_ids, n_e_pos1, n_e_pos2, n_label = self.collect(
             self.inst_id_detail, idxs
