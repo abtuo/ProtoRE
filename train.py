@@ -240,8 +240,8 @@ if __name__ == "__main__":
     train_config = json.load(open(sys.argv[1]))
     train_data = Data(train_config["train_data"], train_config)
 
-    bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
-    # bert_path = "bert-base-cased"
+    #bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
+    bert_path = "bert-base-cased"
     tokenizer = BertTokenizer.from_pretrained(bert_path, do_lower_case=False)
 
     bert_encoder = BERT_EM.from_pretrained(bert_path)
