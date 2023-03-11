@@ -201,20 +201,8 @@ def train(train_data, tokenizer, bert_encoder, config):
             )
             cp_loss = torch.mean(cp_loss)
 
-            loss = (
-                0.5 * cluster_loss
-                + 0.5 * cls_loss
-                + cp_loss
-                + trigger_loss * 0.5
-            )
+            loss = 0.5 * cluster_loss + 0.5 * cls_loss + cp_loss + trigger_loss * 0.5
             loss = loss / float(grad_iter)
-            if i_batch % 10 == 0:
-                print("trigger_loss: ", trigger_loss)
-                print("cluster_loss: ", cluster_loss)
-                print("cls_loss: ", cls_loss)
-                print("cp_loss: ", cp_loss)
-                print("loss: ", loss)
-                print("--" * 20)
 
             loss.backward()
             if i_batch % grad_iter == 0:
@@ -222,6 +210,13 @@ def train(train_data, tokenizer, bert_encoder, config):
                 scheduler.step()
                 optimizer.zero_grad()
         if (i + 1) % config["save_interval"] == 0:
+            print("trigger_loss: ", trigger_loss)
+            print("cluster_loss: ", cluster_loss)
+            print("cls_loss: ", cls_loss)
+            print("cp_loss: ", cp_loss)
+            print("loss: ", loss)
+            print("--" * 20)
+
             model_dir = (
                 "./ckpts/trigger/"
                 + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
