@@ -1,3 +1,4 @@
+import time
 import torch
 import sys
 
@@ -232,17 +233,23 @@ def train(train_data, tokenizer, bert_encoder, config):
                 scheduler.step()
                 optimizer.zero_grad()
         if (i + 1) % config["save_interval"] == 0:
-            model_dir = "./ckpts/ckpt_%d" % i
+            model_dir = (
+                "./ckpts/trigger/"
+                + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+                + "ckpt_%d" % i
+            )
             if not os.path.exists(model_dir):
                 os.mkdir(model_dir)
             bert_encoder.save_pretrained(model_dir)
+
+            t = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
 
 
 if __name__ == "__main__":
     train_config = json.load(open(sys.argv[1]))
     train_data = Data(train_config["train_data"], train_config)
 
-    # bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
+    #bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
     bert_path = "bert-base-cased"
     tokenizer = BertTokenizer.from_pretrained(bert_path, do_lower_case=False)
 

@@ -93,9 +93,9 @@ class BERT_EM(BertPreTrainedModel):
             start_embedding_e2 = start_embedding_e2.cuda()
             relation_embedding = relation_embedding.cuda()
 
-        trigger_loss = self.trigger_sim(start_embedding_e1, start_embedding_e1)
+        # trigger_loss = self.trigger_sim(start_embedding_e1, start_embedding_e1)
 
-        # trigger_loss = torch.tensor([0.0]).cuda()
+        trigger_loss = torch.tensor([0.0], requires_grad=True).cuda()
 
         return masked_lm_loss, relation_embedding, trigger_loss
 
