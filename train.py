@@ -122,20 +122,16 @@ def train(train_data, tokenizer, bert_encoder, config):
         for i_batch, batch_data in enumerate(data_loader):
             # p_ = positive , n_ = negative
             p_input_ids = flat(batch_data["p_input_id"])
-            p_masked_input_ids, p_masked_mlm_labels = mask_tokens(
-                p_input_ids, tokenizer
-            )
+
             p_mask = flat(batch_data["p_mask"])
             p_e_pos1 = flat(batch_data["p_e_pos1"])
             p_e_pos2 = flat(batch_data["p_e_pos2"])
             p_labels = flat(batch_data["p_label"])
-            p_mlm_loss, p_relation_embedding, p_trigger_loss = bert_encoder(
+            p_relation_embedding, p_trigger_loss = bert_encoder(
                 p_input_ids.cuda(),
                 p_e_pos1.cuda(),
                 p_e_pos2.cuda(),
                 attention_mask=p_mask.cuda(),
-                masked_input_ids=p_masked_input_ids.cuda(),
-                masked_lm_labels=p_masked_mlm_labels.cuda(),
             )
 
             # similarity positive prototype/posiitive examples
@@ -144,20 +140,16 @@ def train(train_data, tokenizer, bert_encoder, config):
             )
 
             n_input_ids = flat(batch_data["n_input_id"])
-            n_masked_input_ids, n_masked_mlm_labels = mask_tokens(
-                n_input_ids, tokenizer
-            )
+
             n_mask = flat(batch_data["n_mask"])
             n_e_pos1 = flat(batch_data["n_e_pos1"])
             n_e_pos2 = flat(batch_data["n_e_pos2"])
 
-            n_mlm_loss, n_relation_embedding, n_trigger_loss = bert_encoder(
+            n_relation_embedding, n_trigger_loss = bert_encoder(
                 n_input_ids.cuda(),
                 n_e_pos1.cuda(),
                 n_e_pos2.cuda(),
                 attention_mask=n_mask.cuda(),
-                masked_input_ids=n_masked_input_ids.cuda(),
-                masked_lm_labels=n_masked_mlm_labels.cuda(),
             )
 
             # similarity positive prototype/negative examples
@@ -175,7 +167,6 @@ def train(train_data, tokenizer, bert_encoder, config):
                 )
                 * 0.5
             )
-            mlm_loss = p_mlm_loss.mean() + n_mlm_loss.mean()
             trigger_loss = p_trigger_loss.mean() + n_trigger_loss.mean()
 
             # Contrastive loss
@@ -214,7 +205,6 @@ def train(train_data, tokenizer, bert_encoder, config):
                 0.5 * cluster_loss
                 + 0.5 * cls_loss
                 + cp_loss
-                + mlm_loss * 0.5
                 + trigger_loss * 0.5
             )
             loss = loss / float(grad_iter)
@@ -223,7 +213,6 @@ def train(train_data, tokenizer, bert_encoder, config):
                 print("cluster_loss: ", cluster_loss)
                 print("cls_loss: ", cls_loss)
                 print("cp_loss: ", cp_loss)
-                print("mlm_loss: ", mlm_loss)
                 print("loss: ", loss)
                 print("--" * 20)
 
@@ -242,14 +231,12 @@ def train(train_data, tokenizer, bert_encoder, config):
                 os.mkdir(model_dir)
             bert_encoder.save_pretrained(model_dir)
 
-            t = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
-
 
 if __name__ == "__main__":
     train_config = json.load(open(sys.argv[1]))
     train_data = Data(train_config["train_data"], train_config)
 
-    #bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
+    # bert_path = "/home/users/atuo/language_models/bert/bert-base-cased/"
     bert_path = "bert-base-cased"
     tokenizer = BertTokenizer.from_pretrained(bert_path, do_lower_case=False)
 

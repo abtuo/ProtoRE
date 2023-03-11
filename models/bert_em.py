@@ -52,27 +52,6 @@ class BERT_EM(BertPreTrainedModel):
             print("attention_mask: ", attention_mask.shape)
             raise Exception("Error in BERT_EM forward")
 
-        if masked_input_ids is not None:
-            masked_bert_output = self.bert(
-                masked_input_ids,
-                attention_mask=attention_mask,
-                token_type_ids=token_type_ids,
-                position_ids=position_ids,
-                head_mask=head_mask,
-            )
-            masked_sequence_output = masked_bert_output[0]
-
-            # calculate mlm_loss
-            prediction_scores = self.cls(masked_sequence_output)
-            masked_bert_output = (prediction_scores,) + masked_bert_output[2:]
-
-            if masked_lm_labels is not None:
-                loss_fct = CrossEntropyLoss(ignore_index=-1)
-                masked_lm_loss = loss_fct(
-                    prediction_scores.view(-1, self.config.vocab_size),
-                    masked_lm_labels.view(-1),
-                )
-
         # get relation representation
         sequence_output = bert_output[0]  # batch_size * sequence_length * hidden_size
         factor = torch.tensor(range(0, e_pos1.shape[0])).cuda()
@@ -97,7 +76,7 @@ class BERT_EM(BertPreTrainedModel):
 
         trigger_loss = torch.tensor([0.0], requires_grad=True).cuda()
 
-        return masked_lm_loss, relation_embedding, trigger_loss
+        return relation_embedding, trigger_loss
 
     def predict(
         self,
