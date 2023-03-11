@@ -80,7 +80,7 @@ class Data(Dataset):
         return new_out
 
     def __len__(self):
-        return 1000000000
+        return len(self.relation_inst_ids.keys())
 
     def __getitem__(self, idx):
 
