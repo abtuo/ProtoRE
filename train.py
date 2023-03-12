@@ -66,7 +66,7 @@ def train(train_data, tokenizer, bert_encoder, config):
     print("Start training...")
     K = config["K"]  # number of samples per class
 
-    data_loader = DataLoader(train_data, batch_size=1, shuffle=True)
+    data_loader = DataLoader(train_data, batch_size=2, shuffle=True)
     grad_iter = config.get("grad_iter", 16)
     proto_sim_model = ProtoSimModel(config["relations"], config["embedding_size"])
 
