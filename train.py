@@ -19,7 +19,6 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
-%matplotlib inline
 import matplotlib.pyplot as plt
 
 

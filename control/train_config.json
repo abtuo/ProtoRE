@@ -9,5 +9,5 @@
 	"save_interval": 10,
 	"K": 8,
 	"N": 5,
-	"batch_size": 4
+	"batch_size": 1
 }
