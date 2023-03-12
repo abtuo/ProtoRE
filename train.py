@@ -73,28 +73,19 @@ def mask_tokens(inputs, tokenizer):
 
 
 def plot_embeddings(embeddings, labels, filename):
-    pca = PCA(n_components=50)
-    pca.fit(embeddings)
-    embeddings = pca.transform(embeddings)
+
+    embeddings = embeddings.cpu().detach().numpy()
+    labels = labels.cpu().detach().numpy()
+    
     embeddings = dim_reducer.fit_transform(embeddings)
     plt.figure(figsize=(10, 10))
-    for i in range(len(labels)):
-        plt.scatter(
-            embeddings[i, 0],
-            embeddings[i, 1],
-            color="C" + str(labels[i]),
-            marker=".",
-            alpha=0.5,
-        )
+    plt.scatter(embeddings[:, 0], embeddings[:, 1], c=labels, cmap="tab10")
     plt.savefig(filename)
+    plt.close()
 
 
 def train(train_data, tokenizer, bert_encoder, config):
     print("Start training...")
-
-    # empty tensor for storing the embeddings
-    embeddings = torch.empty(0, config["embedding_size"])
-    labels = torch.empty(0, dtype=torch.long)
 
     K = config["K"]  # number of samples per class
     batch_size = config["batch_size"]
@@ -151,6 +142,9 @@ def train(train_data, tokenizer, bert_encoder, config):
 
     for i in range(config["iterations"]):
         print("Iteration: # %d / %d" % (i, config["iterations"]))
+        # empty tensor for storing the embeddings
+        embeddings = torch.empty(0, config["embedding_size"])
+        labels = torch.empty(0, dtype=torch.long)
 
         for i_batch, batch_data in enumerate(data_loader):
             # p_ = positive , n_ = negative
@@ -170,7 +164,6 @@ def train(train_data, tokenizer, bert_encoder, config):
             # add the embeddings to the tensor
             embeddings = torch.cat((embeddings, p_relation_embedding.cpu()), 0)
             labels = torch.cat((labels, p_labels.cpu()), 0)
-            print("Embeddings shape: ", embeddings.shape)
 
             # similarity positive prototype/posiitive examples
             p_similarity, p_predict_relation = proto_sim_model(
@@ -261,6 +254,8 @@ def train(train_data, tokenizer, bert_encoder, config):
             # print("cp_loss: ", cp_loss)
             print("loss: ", loss)
             print("--" * 20)
+
+            plot_embeddings(embeddings, labels, "ckpt_%d.png" % i)
 
             model_dir = (
                 "./ckpts/trigger_"
