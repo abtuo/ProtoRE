@@ -220,7 +220,7 @@ def train(train_data, tokenizer, bert_encoder, config):
             print("--" * 20)
 
             model_dir = (
-                "./ckpts/trigger/"
+                "./ckpts/trigger_"
                 + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
                 + "_ckpt_%d" % i
             )
