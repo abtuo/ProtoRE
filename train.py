@@ -65,8 +65,9 @@ def mask_tokens(inputs, tokenizer):
 def train(train_data, tokenizer, bert_encoder, config):
     print("Start training...")
     K = config["K"]  # number of samples per class
+    batch_size = config["batch_size"]
 
-    data_loader = DataLoader(train_data, batch_size=2, shuffle=True)
+    data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     grad_iter = config.get("grad_iter", 16)
     proto_sim_model = ProtoSimModel(config["relations"], config["embedding_size"])
 
@@ -113,7 +114,7 @@ def train(train_data, tokenizer, bert_encoder, config):
     bert_encoder.zero_grad()
     proto_sim_model.zero_grad()
 
-    reversed_index = list(range(K))
+    reversed_index = list(range(K*batch_size))
     reversed_index.reverse()
 
     for i in range(config["iterations"]):
