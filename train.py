@@ -221,7 +221,7 @@ def train(train_data, tokenizer, bert_encoder, config):
             print("trigger_loss: ", trigger_loss)
             print("cluster_loss: ", cluster_loss)
             print("cls_loss: ", cls_loss)
-            print("cp_loss: ", cp_loss)
+            # print("cp_loss: ", cp_loss)
             print("loss: ", loss)
             print("--" * 20)
 
