@@ -21,6 +21,8 @@ from sklearn.manifold import TSNE
 
 import matplotlib.pyplot as plt
 
+dim_reducer = TSNE(n_components=2)
+
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 device_ids = [0]
@@ -69,18 +71,33 @@ def mask_tokens(inputs, tokenizer):
     # The rest of the time (10% of the time) we keep the masked input tokens unchanged
     return inputs, labels
 
+
 def plot_embeddings(embeddings, labels, filename):
-    pass
+    pca = PCA(n_components=50)
+    pca.fit(embeddings)
+    embeddings = pca.transform(embeddings)
+    embeddings = dim_reducer.fit_transform(embeddings)
+    plt.figure(figsize=(10, 10))
+    for i in range(len(labels)):
+        plt.scatter(
+            embeddings[i, 0],
+            embeddings[i, 1],
+            color="C" + str(labels[i]),
+            marker=".",
+            alpha=0.5,
+        )
+    plt.savefig(filename)
+
 
 def train(train_data, tokenizer, bert_encoder, config):
     print("Start training...")
 
-    # empty dataframe to store the embeddings
-    df_emb = pd.DataFrame()
+    # empty tensor for storing the embeddings
+    embeddings = torch.empty(0, config["embedding_size"])
+    labels = torch.empty(0, dtype=torch.long)
 
     K = config["K"]  # number of samples per class
     batch_size = config["batch_size"]
-
 
     data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     grad_iter = config.get("grad_iter", 16)
@@ -150,12 +167,11 @@ def train(train_data, tokenizer, bert_encoder, config):
                 attention_mask=p_mask.cuda(),
             )
 
-            # add the embeddings to the dataframe
-            df_emb = df_emb.append(p_relation_embedding.cpu().detach().numpy())
-            # add the labels to the dataframe
-            # df_emb = df_emb.append(p_labels.cpu().detach().numpy())
-            print(df_emb.head())
-
+            # add the embeddings to the tensor
+            embeddings = torch.cat((embeddings, p_relation_embedding.detach()), 0)
+            labels = torch.cat((labels, p_labels.detach()), 0)
+            print("Embeddings shape: ", embeddings.shape)
+            
             # similarity positive prototype/posiitive examples
             p_similarity, p_predict_relation = proto_sim_model(
                 p_relation_embedding, p_labels.cuda()
