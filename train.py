@@ -13,6 +13,15 @@ from transformers import AdamW, WarmupLinearSchedule
 import os
 import json
 
+import numpy as np
+import pandas as pd
+
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
+%matplotlib inline
+import matplotlib.pyplot as plt
+
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 device_ids = [0]
@@ -61,11 +70,18 @@ def mask_tokens(inputs, tokenizer):
     # The rest of the time (10% of the time) we keep the masked input tokens unchanged
     return inputs, labels
 
+def plot_embeddings(embeddings, labels, filename):
+    pass
 
 def train(train_data, tokenizer, bert_encoder, config):
     print("Start training...")
+
+    # empty dataframe to store the embeddings
+    df_emb = pd.DataFrame()
+
     K = config["K"]  # number of samples per class
     batch_size = config["batch_size"]
+
 
     data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     grad_iter = config.get("grad_iter", 16)
@@ -134,6 +150,12 @@ def train(train_data, tokenizer, bert_encoder, config):
                 p_e_pos2.cuda(),
                 attention_mask=p_mask.cuda(),
             )
+
+            # add the embeddings to the dataframe
+            df_emb = df_emb.append(p_relation_embedding.cpu().detach().numpy())
+            # add the labels to the dataframe
+            # df_emb = df_emb.append(p_labels.cpu().detach().numpy())
+            print(df_emb.head())
 
             # similarity positive prototype/posiitive examples
             p_similarity, p_predict_relation = proto_sim_model(
