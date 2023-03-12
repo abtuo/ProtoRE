@@ -114,7 +114,7 @@ def train(train_data, tokenizer, bert_encoder, config):
     bert_encoder.zero_grad()
     proto_sim_model.zero_grad()
 
-    reversed_index = list(range(K*batch_size))
+    reversed_index = list(range(K * batch_size))
     reversed_index.reverse()
 
     for i in range(config["iterations"]):
@@ -187,6 +187,7 @@ def train(train_data, tokenizer, bert_encoder, config):
                 1,
                 torch.tensor(reversed_index).cuda(),
             ).view(-1, config["embedding_size"])
+
             positive_part = (
                 torch.sum(p_relation_embedding * reversed_p_relation_embedding, -1)
                 / 100
