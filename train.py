@@ -157,10 +157,14 @@ def train(train_data, tokenizer, bert_encoder, config):
             n_similarity, n_predict_relation = proto_sim_model(
                 n_relation_embedding, p_labels.cuda()
             )
+
+            # loss similarity prototype/examples
             cluster_loss = -(
                 torch.mean(torch.log(p_similarity + 1e-5))
                 + torch.mean(torch.log(1 - n_similarity + 1e-5))
             )
+
+            # classification loss
             cls_loss = (
                 torch.mean(
                     cross_entropy(p_predict_relation, p_labels.cuda())
