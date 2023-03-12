@@ -174,6 +174,7 @@ def train(train_data, tokenizer, bert_encoder, config):
             )
             trigger_loss = p_trigger_loss.mean() + n_trigger_loss.mean()
 
+            """
             # Contrastive loss
             # (batch_size, sample_size, embedding_size)
             repeat_time, embedding_size = n_relation_embedding.shape
@@ -206,8 +207,9 @@ def train(train_data, tokenizer, bert_encoder, config):
                 + 1e-5
             )
             cp_loss = torch.mean(cp_loss)
+            """
 
-            loss = 0.5 * cluster_loss + 0.5 * cls_loss + cp_loss + trigger_loss * 0.5
+            loss = 0.5 * cluster_loss + 0.5 * cls_loss + trigger_loss * 0.5
             loss = loss / float(grad_iter)
 
             loss.backward()
