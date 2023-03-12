@@ -220,7 +220,7 @@ def train(train_data, tokenizer, bert_encoder, config):
             model_dir = (
                 "./ckpts/trigger/"
                 + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
-                + "ckpt_%d" % i
+                + "_ckpt_%d" % i
             )
             if not os.path.exists(model_dir):
                 os.mkdir(model_dir)
