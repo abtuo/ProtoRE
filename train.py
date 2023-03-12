@@ -168,10 +168,10 @@ def train(train_data, tokenizer, bert_encoder, config):
             )
 
             # add the embeddings to the tensor
-            embeddings = torch.cat((embeddings, p_relation_embedding.detach()), 0)
-            labels = torch.cat((labels, p_labels.detach()), 0)
+            embeddings = torch.cat((embeddings, p_relation_embedding.cpu()), 0)
+            labels = torch.cat((labels, p_labels.cpu()), 0)
             print("Embeddings shape: ", embeddings.shape)
-            
+
             # similarity positive prototype/posiitive examples
             p_similarity, p_predict_relation = proto_sim_model(
                 p_relation_embedding, p_labels.cuda()
