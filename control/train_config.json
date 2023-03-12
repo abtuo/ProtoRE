@@ -5,8 +5,8 @@
 	"base_model": "bert-base-cased",
 	"relations": 19,
 	"embedding_size": 1536,
-	"iterations": 1000,
-	"save_interval": 100,
+	"iterations": 100,
+	"save_interval": 10,
 	"K": 8,
 	"N": 5
 }
